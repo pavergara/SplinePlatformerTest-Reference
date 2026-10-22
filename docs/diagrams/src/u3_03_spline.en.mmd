@@ -1,0 +1,35 @@
+%% U3 - 03 2.5D Spline Navigation (English)
+%% Based on BP_SplineCharacter_Restruct, BP_SplineRoute, BP_JunctionTrigger, BPI_SetRouteAndPosition
+%% Asset, node and interface names are intentionally untranslated.
+flowchart TD
+    classDef input fill:#4A154B,stroke:#333,stroke-width:2px,color:#fff;
+    classDef player fill:#1A365D,stroke:#333,stroke-width:2px,color:#fff;
+    classDef world fill:#1C6434,stroke:#333,stroke-width:2px,color:#fff;
+    classDef route fill:#7B341E,stroke:#333,stroke-width:2px,color:#fff;
+
+    subgraph CapaInput ["INPUT"]
+        A["A / D (Enhanced Input)"] -->|Move axis| B["BP_SplineCharacter_Restruct: Event Tick"]
+    end
+
+    subgraph CapaMovimiento ["MOVEMENT PIPELINE (2.5D)"]
+        B --> C["AuxGetDeltaDistanceCurrentAndPossible()"]
+        C --> D["CurrentDistanceAlongSpline"]
+        D --> E["SplinePath (BP_SplineRoute) - GetLocationAtDistanceAlongSpline"]
+        E --> F["K2_SetActorLocation (Z-Offset)"]
+        F --> G["Camera spring arm: TargetCameraYaw / Pitch / Zoom"]
+        B --> H["VelocityDeathZone()"]
+        H --> D
+    end
+
+    subgraph CapaRuta ["ROUTE CHANGE"]
+        I["BP_JunctionTrigger: Box overlap"] --> J["BPI_TriggerInteract: OnPlayerOverlap"]
+        J --> K["ChangePath(): SplineRouteUp / SplineRouteDown / SplineRouteTrunk"]
+        K --> L["BP_PlayerController: BPI_SetRouteAndPosition"]
+        L --> M["BP_SplineCharacter_Restruct: ChangeSpline(NewSpline)"]
+        M --> E
+    end
+
+    class A,B input;
+    class C,D,E,F,G,H,M player;
+    class I,J,K world;
+    class L route;

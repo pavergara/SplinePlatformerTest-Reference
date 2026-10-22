@@ -1,0 +1,42 @@
+%% U3 - 01 Sistema de Menús Modular (Español)
+%% Diagrama de arquitectura / jerarquía (flowchart)
+%% Los nombres de clases, nodos y dispatchers se mantienen sin traducir.
+flowchart TD
+    classDef entrada fill:#4A154B,stroke:#333,stroke-width:2px,color:#fff;
+    classDef control fill:#1A365D,stroke:#333,stroke-width:2px,color:#fff;
+    classDef contenido fill:#1C6434,stroke:#333,stroke-width:2px,color:#fff;
+    classDef popup fill:#7B341E,stroke:#333,stroke-width:2px,color:#fff;
+
+    subgraph CapaEntrada ["CAPA DE ENTRADA - Mapeo de input personalizado"]
+        A["C++: Enhanced Input"] -->|Intercepta WASD| B["CommonUI Input Config"]
+    end
+
+    subgraph CapaControl ["CAPA DE CONTROL - Orquestador global del HUD (ce246m0h)"]
+        PC["BP_PlayerController: BeginPlay"] -->|1. Crea el HUD| HUD["WBP_MainHUD"]
+        HUD -->|Contenedor principal| Stack["CommonActivatableWidgetStack (Menú)"]
+        HUD -->|Contenedor de alertas| PopupStack["CommonActivatableWidgetStack (Popup)"]
+        PC -->|2. Establece el widget raíz| M["WBP_ButtonsScreen"]
+        Stack -.->|Mantiene el foco y el historial| M
+    end
+
+    subgraph CapaContenido ["CAPA DE CONTENIDO - Módulos de menú (bku8ap6-)"]
+        M -->|Navegación interna| Switcher["CommonActivatableWidgetSwitcher"]
+        Switcher -->|Submenú 0| SM0["WBP_ButtonsMainScreen"]
+        Switcher -->|Submenú 1| SM1["WBP_ButtonsPlayScreen"]
+        SM0 & SM1 -->|Atrás o ESC| Back["Event Dispatcher: OnBackHere"]
+        Back -->|Extrae la capa activa| Stack
+    end
+
+    subgraph CapaPopup ["CAPA DE ALERTA ASÍNCRONA - Flujo de salida"]
+        SM0 -->|Clic en Quit Game| QuitDispatch["Event Dispatcher: OnQuitClickedTriggered"]
+        QuitDispatch -->|Escuchado por| PC
+        PC -->|3. Empuja al Popup Stack| ConfirmUI["WBP_ConfirmScreen"]
+        PopupStack -.->|Aísla el foco y el input| ConfirmUI
+        ConfirmUI -->|OnCancelConfirm| PC
+        ConfirmUI -->|OnAcceptConfirm| QuitNode["Nodo nativo: Quit Game"]
+    end
+
+    class A,B entrada;
+    class PC,HUD,Stack,PopupStack control;
+    class M,Switcher,SM0,SM1,Back contenido;
+    class QuitDispatch,ConfirmUI,QuitNode popup;

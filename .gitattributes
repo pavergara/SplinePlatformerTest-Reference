@@ -1,0 +1,11 @@
+* text=auto eol=lf
+*.uproject text
+*.uplugin text
+*.ini text
+*.cs text
+*.h text
+*.cpp text
+*.md text
+*.ps1 text
+*.mmd text
+*.svg text

@@ -1,0 +1,42 @@
+%% U3 - 05 Event-Driven Communication (English)
+%% Dispatcher names and bindings verified from the exported Blueprint graphs.
+%% Asset, widget and dispatcher names are intentionally untranslated.
+flowchart LR
+    classDef menu fill:#1A365D,stroke:#333,stroke-width:2px,color:#fff;
+    classDef world fill:#1C6434,stroke:#333,stroke-width:2px,color:#fff;
+    classDef iface fill:#4A154B,stroke:#333,stroke-width:2px,color:#fff;
+    classDef note fill:#2D3748,stroke:#718096,stroke-width:1px,color:#E2E8F0;
+
+    subgraph Menu ["MENU (CommonUI Event Dispatchers)"]
+        M1["WBP_ButtonsMainScreen"]
+        M2["WBP_ButtonsPlayScreen"]
+        M3["WBP_ButtonsScreen"]
+        M4["WBP_ConfirmScreen"]
+        M5["WBP_PressAnyKeyScreen / WBP_CleanScreen"]
+        PC["BP_FrontEnd_PlayerController_CommonUI"]
+        M1 -->|OnQuitClickedTriggered| PC
+        M2 -->|OnPlayNewGame| PC
+        M3 -->|OnBackToAnyKeySCreen| PC
+        M4 -->|OnAcceptConfirmTriggered / OnCancelConfirmTriggered| PC
+        M5 -->|OnAnyKeyPressed| PC
+        M1 -->|OnBackInputTriggered| M3
+        M2 -->|OnBackInputTriggered| M3
+    end
+
+    subgraph Gameplay ["GAMEPLAY (no direct references)"]
+        SW["BP_SwitchDispatcher"]
+        PS["BP_PressureSwitch (inherits BP_SwitchDispatcher)"]
+        VR["BP_ValidatorRotatorsSum"]
+        DOOR["BP_DoorToOpen"]
+        PC2["BP_PlayerController"]
+        SW -->|OnEndActivate| DOOR
+        PS -.->|OnEndActivate| DOOR
+        VR -->|OnEndActivate| DOOR
+        PC2 -->|SetPlayerLocationDispatcher| L["Bound listeners"]
+    end
+
+    N["Emitters broadcast; listeners bind at BeginPlay"]
+    class M1,M2,M3,M4,M5,PC,PC2 menu;
+    class SW,PS,VR,DOOR world;
+    class L iface;
+    class N note;

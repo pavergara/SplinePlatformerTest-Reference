@@ -1,0 +1,40 @@
+%% U3 - 01 Modular Menu System (English)
+%% Runtime communication / sequence diagram
+%% Participant names, node names and dispatcher names are intentionally untranslated.
+sequenceDiagram
+    autonumber
+    actor Player as Player (WASD / Inputs)
+    participant PC as BP_FrontEnd_PlayerController
+    participant HUD as WBP_MainHUD
+    participant Stack as Menu Widget Stack
+    participant MainMenu as WBP_ButtonsMainScreen
+    participant PopupStack as Popup Widget Stack
+    participant ConfirmUI as WBP_ConfirmScreen
+
+    Note over PC,HUD: Phase 1 - Scene Initialization (ce246m0h)
+    PC->>HUD: Create Widget (WBP_MainHUD) + Add To Viewport
+    PC->>Stack: BP_AddWidget (WBP_ButtonsScreen)
+    PC->>MainMenu: Dynamic Bind to Dispatchers (OnQuitClicked, OnPlayNewGame)
+
+    Note over Player,MainMenu: Phase 2 - Navigation and Back Action Stack (bku8ap6-)
+    Player->>MainMenu: Press Back or ESC
+    MainMenu->>PC: Broadcast OnBackHere()
+    PC->>Stack: Pop active layer (native CommonUI)
+
+    Note over Player,ConfirmUI: Phase 3 - Decoupled Quit Popup (Mediator Pattern)
+    Player->>MainMenu: Click Quit Game
+    MainMenu->>PC: Broadcast OnQuitClickedTriggered()
+    Note over PC,PopupStack: PlayerController intercepts and orchestrates the transition
+    PC->>PC: Set Camera Tag - Quit
+    PC->>PopupStack: BP_AddWidget (WBP_ConfirmScreen)
+    PC->>ConfirmUI: SetText (Are you sure you want to Quit?)
+    PC->>ConfirmUI: ActivateWidget - CommonUI takes input focus
+
+    alt Player presses Cancel
+        ConfirmUI->>PC: Broadcast OnCancelConfirmTriggered()
+        PC->>PC: Set Camera Tag - Main
+        PC->>PopupStack: RemoveWidget (WBP_ConfirmScreen)
+    else Player presses Confirm
+        ConfirmUI->>PC: Broadcast OnAcceptConfirmTriggered()
+        PC->>PC: Native node - Quit Game
+    end

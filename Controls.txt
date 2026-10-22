@@ -1,0 +1,29 @@
+Keyboard
+========
+
+-Menu
+Up/Down/Left/Righ: WSAD
+Accept: Space/Enter
+Back: Q
+
+- Gameplay
+Left/Right : A/D
+Crouch: Left Shift
+Jump: Space
+Pause: Tab
+
+
+Gamepad:
+========
+
+-Menu
+Up/Down/Left/Righ: Left Stick
+Accept: FaceButton Bottom (A)
+Back: FaceButton Right (B)
+
+-Gameplay
+Left/Right : Left Stick Left/Righ
+Crouch: RightShoulder Button
+Jump: FaceButton Bottom (A)
+Pause: Special Right (Start)
+

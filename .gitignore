@@ -1,0 +1,23 @@
+# Build artifacts and local config (ignored at any depth)
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+Content/
+Plugins/
+.vs/
+.vscode/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Generated logs
+*.log

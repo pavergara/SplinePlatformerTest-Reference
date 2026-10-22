@@ -1,0 +1,42 @@
+%% U3 - 01 Modular Menu System (English)
+%% Architecture / hierarchy diagram (flowchart)
+%% Class names, node names and dispatcher names are intentionally untranslated.
+flowchart TD
+    classDef entrada fill:#4A154B,stroke:#333,stroke-width:2px,color:#fff;
+    classDef control fill:#1A365D,stroke:#333,stroke-width:2px,color:#fff;
+    classDef contenido fill:#1C6434,stroke:#333,stroke-width:2px,color:#fff;
+    classDef popup fill:#7B341E,stroke:#333,stroke-width:2px,color:#fff;
+
+    subgraph CapaEntrada ["INPUT LAYER - Custom Input Mapping"]
+        A["C++: Enhanced Input"] -->|Intercepts WASD| B["CommonUI Input Config"]
+    end
+
+    subgraph CapaControl ["CONTROL LAYER - Global HUD Orchestrator (ce246m0h)"]
+        PC["BP_PlayerController: BeginPlay"] -->|1. Creates HUD| HUD["WBP_MainHUD"]
+        HUD -->|Main Container| Stack["CommonActivatableWidgetStack (Menu)"]
+        HUD -->|Alert Container| PopupStack["CommonActivatableWidgetStack (Popup)"]
+        PC -->|2. Sets Root Widget| M["WBP_ButtonsScreen"]
+        Stack -.->|Keeps Focus and History| M
+    end
+
+    subgraph CapaContenido ["CONTENT LAYER - Menu Modules (bku8ap6-)"]
+        M -->|Internal Navigation| Switcher["CommonActivatableWidgetSwitcher"]
+        Switcher -->|Sub-menu 0| SM0["WBP_ButtonsMainScreen"]
+        Switcher -->|Sub-menu 1| SM1["WBP_ButtonsPlayScreen"]
+        SM0 & SM1 -->|Back or ESC| Back["Event Dispatcher: OnBackHere"]
+        Back -->|Pops Active Layer| Stack
+    end
+
+    subgraph CapaPopup ["ASYNC ALERT LAYER - Quit Flow"]
+        SM0 -->|Quit Game Click| QuitDispatch["Event Dispatcher: OnQuitClickedTriggered"]
+        QuitDispatch -->|Listened by| PC
+        PC -->|3. Pushes to Popup Stack| ConfirmUI["WBP_ConfirmScreen"]
+        PopupStack -.->|Isolates Focus and Input| ConfirmUI
+        ConfirmUI -->|OnCancelConfirm| PC
+        ConfirmUI -->|OnAcceptConfirm| QuitNode["Execute Native: Quit Game"]
+    end
+
+    class A,B entrada;
+    class PC,HUD,Stack,PopupStack control;
+    class M,Switcher,SM0,SM1,Back contenido;
+    class QuitDispatch,ConfirmUI,QuitNode popup;

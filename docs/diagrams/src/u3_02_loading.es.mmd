@@ -1,0 +1,41 @@
+%% U3 - 02 Additive Loading Subsystem (Español)
+%% Diagrama de secuencia basado en ULoadingSubsystem.cpp
+%% Los nombres de clases, funciones y widgets se mantienen sin traducir.
+sequenceDiagram
+    autonumber
+    participant BP as Llamador desde Blueprint
+    participant LS as ULoadingSubsystem
+    participant VP as GameViewport
+    participant SM as StreamableManager
+    participant TM as TimerManager
+    participant W as WBP_LoadingScreen
+    participant Engine as Engine
+
+    BP->>LS: LoadLevelWithProgress(Level, WidgetClass, ExtraDelay, Fade)
+    LS->>TM: ClearTimer(ProgressTimer y TransitionTimer)
+    LS->>W: CreateWidget(WBP_LoadingScreen)
+    LS->>VP: AddViewportWidgetContent(Z = 999)
+    LS->>SM: RequestAsyncLoad(Level)
+    LS->>TM: SetTimer(0.01 s, en bucle)
+
+    loop Mientras el nivel se carga en streaming
+        TM->>LS: UpdateLoadingProgress()
+        LS->>W: UpdateLoadingProgress(Progress) vía ProcessEvent
+    end
+
+    SM-->>LS: OnLevelAsyncLoadComplete()
+    LS->>LS: UpdateLoadingProgressFull() fija el progreso en 1.0
+    LS->>Engine: OpenLevel(TargetMap)
+
+    Note over LS,Engine: El widget vive en el GameViewport, por lo que sobrevive al cambio de nivel
+
+    Engine-->>LS: PostLoadMapWithWorld(LoadedWorld)
+    LS->>TM: SetTimer(SavedExtraDelay)
+    TM->>LS: StartFadeOut()
+
+    loop Fade-out cada 0.016 s
+        LS->>W: SetRenderOpacity(CurrentOpacity)
+    end
+
+    LS->>VP: RemoveViewportWidgetContent()
+    Note over BP,LS: HideLoadingScreen() cancela la espera y puede retirar el widget al instante

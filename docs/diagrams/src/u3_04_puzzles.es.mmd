@@ -1,0 +1,39 @@
+%% U3 - 04 Decoupled Puzzle Architecture (Español)
+%% Basado en BPI_TriggerInteract, BPI_TurnOn, BPI_PuzzleResolutionReporter,
+%% BP_PressureSwitch, BP_DoorToOpen, BP_RotatorCylinder_Puzzle, BP_ValidatorRotatorsSum
+%% Los nombres de assets e interfaces se mantienen sin traducir.
+flowchart LR
+    classDef trigger fill:#1C6434,stroke:#333,stroke-width:2px,color:#fff;
+    classDef iface fill:#4A154B,stroke:#333,stroke-width:2px,color:#fff;
+    classDef resolver fill:#1A365D,stroke:#333,stroke-width:2px,color:#fff;
+    classDef note fill:#2D3748,stroke:#718096,stroke-width:1px,color:#E2E8F0;
+
+    subgraph Disparadores ["DISPARADORES DEL MUNDO (BPI_TriggerInteract)"]
+        P["BP_PressureSwitch (hereda de BP_SwitchDispatcher)"]
+        R["BP_RotatorCylinder_Puzzle"]
+    end
+
+    subgraph Interfaces ["INTERFACES (sin Cast ni referencias duras)"]
+        T["BPI_TriggerInteract"]
+        U["BPI_TurnOn"]
+        V["BPI_PuzzleResolutionReporter"]
+    end
+
+    subgraph Resolvedores ["RESOLVEDORES"]
+        D["BP_DoorToOpen (implementa BPI_TurnOn)"]
+        S["BP_ValidatorRotatorsSum"]
+    end
+
+    P -->|OnPlayerOverlap / OnInteract| T
+    R -->|OnInteract| T
+    P -->|ToActivates: N actores| U
+    U -->|OnTurnOn| D
+    R -->|reporta resolución| V
+    V -->|todos los puzzles resueltos| S
+    S -->|OnEndActivate| D
+
+    N["Se pueden añadir N triggers sin editar la puerta"]
+    class P,R trigger;
+    class T,U,V iface;
+    class D,S resolver;
+    class N note;
